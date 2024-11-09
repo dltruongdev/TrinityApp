@@ -16,4 +16,7 @@ migrate-up:
 migrate-down:
 	migrate -path db/migration -database "postgresql://root:mysecret@localhost:5432/trinity_app?sslmode=disable" -verbose down
 
-.PHONY: createdb dropdb pullpostgres postgres migrate-up migrate-down 
+sqlc:
+	sqlc generate
+
+.PHONY: createdb dropdb pullpostgres postgres migrate-up migrate-down sqlc
