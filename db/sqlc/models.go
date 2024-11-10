@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.27.0
 
-package repository
+package db
 
 import (
 	"database/sql"
@@ -62,12 +62,12 @@ type Usertype struct {
 }
 
 type Voucher struct {
-	VoucherID  int32         `json:"voucher_id"`
-	UserID     sql.NullInt32 `json:"user_id"`
-	CampaignID sql.NullInt32 `json:"campaign_id"`
-	Code       string        `json:"code"`
-	ValidUntil sql.NullTime  `json:"valid_until"`
-	IsRedeemed sql.NullBool  `json:"is_redeemed"`
-	CreatedAt  sql.NullTime  `json:"created_at"`
-	UpdatedAt  sql.NullTime  `json:"updated_at"`
+	VoucherID  int32        `json:"voucher_id"`
+	UserID     int32        `json:"user_id"`
+	CampaignID int32        `json:"campaign_id"`
+	Code       string       `json:"code"`
+	ValidUntil time.Time    `json:"valid_until"`
+	IsRedeemed sql.NullBool `json:"is_redeemed"`
+	CreatedAt  sql.NullTime `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
 }

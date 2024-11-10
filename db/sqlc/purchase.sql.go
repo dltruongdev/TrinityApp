@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: purchase.sql
 
-package repository
+package db
 
 import (
 	"context"
@@ -105,7 +105,7 @@ func (q *Queries) ListPurchases(ctx context.Context) ([]ListPurchasesRow, error)
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListPurchasesRow
+	items := []ListPurchasesRow{}
 	for rows.Next() {
 		var i ListPurchasesRow
 		if err := rows.Scan(

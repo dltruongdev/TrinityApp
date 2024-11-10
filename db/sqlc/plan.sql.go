@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: plan.sql
 
-package repository
+package db
 
 import (
 	"context"
@@ -61,7 +61,7 @@ func (q *Queries) ListPlans(ctx context.Context) ([]Plan, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Plan
+	items := []Plan{}
 	for rows.Next() {
 		var i Plan
 		if err := rows.Scan(&i.PlanID, &i.PlanName, &i.Price); err != nil {

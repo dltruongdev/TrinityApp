@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: user_type.sql
 
-package repository
+package db
 
 import (
 	"context"
@@ -57,7 +57,7 @@ func (q *Queries) ListUserTypes(ctx context.Context) ([]Usertype, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Usertype
+	items := []Usertype{}
 	for rows.Next() {
 		var i Usertype
 		if err := rows.Scan(&i.UserTypeID, &i.TypeName); err != nil {

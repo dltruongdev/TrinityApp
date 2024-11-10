@@ -49,10 +49,10 @@ CREATE TABLE CampaignPlans (
 
 CREATE TABLE Vouchers (
     voucher_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES Users(user_id) ON DELETE CASCADE,
-    campaign_id INT REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
+    campaign_id INT NOT NULL REFERENCES Campaigns(campaign_id) ON DELETE CASCADE,
     code VARCHAR(50) NOT NULL UNIQUE,
-    valid_until TIMESTAMP,
+    valid_until TIMESTAMP NOT NULL,
     is_redeemed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

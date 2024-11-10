@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: user.sql
 
-package repository
+package db
 
 import (
 	"context"
@@ -97,7 +97,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []User
+	items := []User{}
 	for rows.Next() {
 		var i User
 		if err := rows.Scan(
