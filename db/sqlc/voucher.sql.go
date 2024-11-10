@@ -88,8 +88,8 @@ func (q *Queries) GetVoucherByCode(ctx context.Context, code string) (GetVoucher
 
 const redeemVoucher = `-- name: RedeemVoucher :execrows
 UPDATE Vouchers
-SET is_redeemed = true, updated_at = NOW()
-WHERE code = $1 AND user_id = $2
+SET is_redeemed = TRUE, updated_at = NOW()
+WHERE code = $1 AND user_id = $2 AND valid_until > NOW() AND is_redeemed = FALSE
 `
 
 type RedeemVoucherParams struct {

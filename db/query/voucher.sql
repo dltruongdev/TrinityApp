@@ -14,5 +14,5 @@ WHERE code = $1;
 
 -- name: RedeemVoucher :execrows
 UPDATE Vouchers
-SET is_redeemed = true, updated_at = NOW()
-WHERE code = $1 AND user_id = $2 AND valid_until > NOW();
+SET is_redeemed = TRUE, updated_at = NOW()
+WHERE code = $1 AND user_id = $2 AND valid_until > NOW() AND is_redeemed = FALSE;
