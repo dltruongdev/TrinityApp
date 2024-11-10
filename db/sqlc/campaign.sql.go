@@ -18,14 +18,14 @@ RETURNING campaign_id, name, description, code, start_date, end_date, max_vouche
 `
 
 type CreateCampaignParams struct {
-	Name               string         `json:"name"`
-	Description        sql.NullString `json:"description"`
-	Code               string         `json:"code"`
-	StartDate          time.Time      `json:"start_date"`
-	EndDate            time.Time      `json:"end_date"`
-	MaxVouchers        int32          `json:"max_vouchers"`
-	VoucherLifetime    int32          `json:"voucher_lifetime"`
-	DiscountPercentage int32          `json:"discount_percentage"`
+	Name               string    `json:"name"`
+	Description        string    `json:"description"`
+	Code               string    `json:"code"`
+	StartDate          time.Time `json:"start_date"`
+	EndDate            time.Time `json:"end_date"`
+	MaxVouchers        int32     `json:"max_vouchers"`
+	VoucherLifetime    int32     `json:"voucher_lifetime"`
+	DiscountPercentage int32     `json:"discount_percentage"`
 }
 
 func (q *Queries) CreateCampaign(ctx context.Context, arg CreateCampaignParams) (Campaign, error) {
@@ -57,15 +57,24 @@ func (q *Queries) CreateCampaign(ctx context.Context, arg CreateCampaignParams) 
 	return i, err
 }
 
+const deleteCompaignByCode = `-- name: DeleteCompaignByCode :exec
+DELETE FROM Campaigns
+WHERE code = $1
+`
+
+func (q *Queries) DeleteCompaignByCode(ctx context.Context, code string) error {
+	_, err := q.db.ExecContext(ctx, deleteCompaignByCode, code)
+	return err
+}
+
 const getCampaignForUpdate = `-- name: GetCampaignForUpdate :one
 SELECT 
-    name, 
+    campaign_id,
     code,
     end_date, 
-    max_vouchers, 
     voucher_lifetime, 
     discount_percentage,
-    start_date <= NOW() AND end_date > NOW() AND redeemed_vouchers < max_vouchers AS isValid
+    start_date <= NOW() AND end_date > NOW() AND redeemed_vouchers < max_vouchers
 FROM 
     Campaigns
 WHERE 
@@ -74,61 +83,84 @@ FOR NO KEY UPDATE
 `
 
 type GetCampaignForUpdateRow struct {
-	Name               string       `json:"name"`
+	CampaignID         int32        `json:"campaign_id"`
 	Code               string       `json:"code"`
 	EndDate            time.Time    `json:"end_date"`
-	MaxVouchers        int32        `json:"max_vouchers"`
 	VoucherLifetime    int32        `json:"voucher_lifetime"`
 	DiscountPercentage int32        `json:"discount_percentage"`
-	Isvalid            sql.NullBool `json:"isvalid"`
+	Column6            sql.NullBool `json:"column_6"`
 }
 
 func (q *Queries) GetCampaignForUpdate(ctx context.Context, code string) (GetCampaignForUpdateRow, error) {
 	row := q.db.QueryRowContext(ctx, getCampaignForUpdate, code)
 	var i GetCampaignForUpdateRow
 	err := row.Scan(
-		&i.Name,
+		&i.CampaignID,
 		&i.Code,
 		&i.EndDate,
-		&i.MaxVouchers,
 		&i.VoucherLifetime,
 		&i.DiscountPercentage,
-		&i.Isvalid,
+		&i.Column6,
 	)
 	return i, err
 }
 
-const increaseRedeemedVoucher = `-- name: IncreaseRedeemedVoucher :one
+const getCompaignByCode = `-- name: GetCompaignByCode :one
+SELECT campaign_id, name, description, code, start_date, end_date, max_vouchers, redeemed_vouchers, voucher_lifetime, discount_percentage, created_at, updated_at
+FROM Campaigns
+WHERE code = $1
+`
+
+func (q *Queries) GetCompaignByCode(ctx context.Context, code string) (Campaign, error) {
+	row := q.db.QueryRowContext(ctx, getCompaignByCode, code)
+	var i Campaign
+	err := row.Scan(
+		&i.CampaignID,
+		&i.Name,
+		&i.Description,
+		&i.Code,
+		&i.StartDate,
+		&i.EndDate,
+		&i.MaxVouchers,
+		&i.RedeemedVouchers,
+		&i.VoucherLifetime,
+		&i.DiscountPercentage,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const increaseRedeemedVoucher = `-- name: IncreaseRedeemedVoucher :execrows
 UPDATE Campaigns
-SET redeemed_vouchers = redeemed_vouchers + 1
+SET redeemed_vouchers = redeemed_vouchers + 1, updated_at = NOW()
 WHERE code = $1
 AND end_date > NOW()
 AND redeemed_vouchers < max_vouchers
-RETURNING 
-    start_date, 
-    end_date, 
-    voucher_lifetime, 
-    discount_percentage
 `
 
-type IncreaseRedeemedVoucherRow struct {
-	StartDate          time.Time `json:"start_date"`
-	EndDate            time.Time `json:"end_date"`
-	VoucherLifetime    int32     `json:"voucher_lifetime"`
-	DiscountPercentage int32     `json:"discount_percentage"`
+// - Doing update directly will lock the record for update, if concurrent update happens (when two user finish register at the same time and there only one voucher left to be generated) this will keep the logic correctly
+func (q *Queries) IncreaseRedeemedVoucher(ctx context.Context, code string) (int64, error) {
+	result, err := q.db.ExecContext(ctx, increaseRedeemedVoucher, code)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
-// - Doing update directly will lock the record for update, if concurrent update happens (when two user finish register at the same time and there only one voucher left to be generated) this will keep the logic correctly
-func (q *Queries) IncreaseRedeemedVoucher(ctx context.Context, code string) (IncreaseRedeemedVoucherRow, error) {
-	row := q.db.QueryRowContext(ctx, increaseRedeemedVoucher, code)
-	var i IncreaseRedeemedVoucherRow
-	err := row.Scan(
-		&i.StartDate,
-		&i.EndDate,
-		&i.VoucherLifetime,
-		&i.DiscountPercentage,
-	)
-	return i, err
+const isCampaginExist = `-- name: IsCampaginExist :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Campaigns
+    WHERE code = $1
+)
+`
+
+func (q *Queries) IsCampaginExist(ctx context.Context, code string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, isCampaginExist, code)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const isCampaignValid = `-- name: IsCampaignValid :one

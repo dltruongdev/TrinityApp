@@ -11,36 +11,28 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO Users (name, email, password_hash, user_type_id)
-VALUES ($1, $2, $3, $4)
-RETURNING user_id, name, email, password_hash, registration_date, last_login, user_type_id
+INSERT INTO Users (name, email, password_hash, user_type_id, plan_id)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING user_id, name, email, password_hash, registration_date, last_login, user_type_id, plan_id
 `
 
 type CreateUserParams struct {
 	Name         string        `json:"name"`
 	Email        string        `json:"email"`
 	PasswordHash string        `json:"password_hash"`
-	UserTypeID   sql.NullInt32 `json:"user_type_id"`
+	UserTypeID   int32         `json:"user_type_id"`
+	PlanID       sql.NullInt32 `json:"plan_id"`
 }
 
-type CreateUserRow struct {
-	UserID           int32         `json:"user_id"`
-	Name             string        `json:"name"`
-	Email            string        `json:"email"`
-	PasswordHash     string        `json:"password_hash"`
-	RegistrationDate sql.NullTime  `json:"registration_date"`
-	LastLogin        sql.NullTime  `json:"last_login"`
-	UserTypeID       sql.NullInt32 `json:"user_type_id"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.Name,
 		arg.Email,
 		arg.PasswordHash,
 		arg.UserTypeID,
+		arg.PlanID,
 	)
-	var i CreateUserRow
+	var i User
 	err := row.Scan(
 		&i.UserID,
 		&i.Name,
@@ -49,6 +41,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.RegistrationDate,
 		&i.LastLogin,
 		&i.UserTypeID,
+		&i.PlanID,
 	)
 	return i, err
 }
@@ -83,6 +76,21 @@ func (q *Queries) GetUserByID(ctx context.Context, userID int32) (User, error) {
 		&i.PlanID,
 	)
 	return i, err
+}
+
+const isUserExist = `-- name: IsUserExist :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Users
+    WHERE email = $1
+)
+`
+
+func (q *Queries) IsUserExist(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, isUserExist, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const listUsers = `-- name: ListUsers :many
@@ -135,7 +143,7 @@ type UpdateUserParams struct {
 	Name         string        `json:"name"`
 	PasswordHash string        `json:"password_hash"`
 	LastLogin    sql.NullTime  `json:"last_login"`
-	UserTypeID   sql.NullInt32 `json:"user_type_id"`
+	UserTypeID   int32         `json:"user_type_id"`
 	PlanID       sql.NullInt32 `json:"plan_id"`
 }
 
@@ -145,7 +153,7 @@ type UpdateUserRow struct {
 	PasswordHash     string        `json:"password_hash"`
 	RegistrationDate sql.NullTime  `json:"registration_date"`
 	LastLogin        sql.NullTime  `json:"last_login"`
-	UserTypeID       sql.NullInt32 `json:"user_type_id"`
+	UserTypeID       int32         `json:"user_type_id"`
 	PlanID           sql.NullInt32 `json:"plan_id"`
 }
 

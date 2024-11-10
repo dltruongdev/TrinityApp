@@ -17,14 +17,14 @@ CREATE TABLE Users (
     password_hash VARCHAR(255) NOT NULL,
     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
-    user_type_id INT REFERENCES UserTypes(user_type_id),
+    user_type_id INT NOT NULL REFERENCES UserTypes(user_type_id),
     plan_id INT DEFAULT 1 REFERENCES Plans(plan_id) --default to basic plan (id=1)
 );
 
 CREATE TABLE Campaigns (
     campaign_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL DEFAULT 'empty',
     code VARCHAR(50) NOT NULL UNIQUE,
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP NOT NULL,

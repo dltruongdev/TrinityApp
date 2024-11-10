@@ -13,32 +13,36 @@ type Querier interface {
 	CreateCampaignPlan(ctx context.Context, arg CreateCampaignPlanParams) error
 	CreatePlan(ctx context.Context, arg CreatePlanParams) (Plan, error)
 	CreatePurchase(ctx context.Context, arg CreatePurchaseParams) (CreatePurchaseRow, error)
-	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	CreateUserType(ctx context.Context, typeName string) (Usertype, error)
 	CreateVoucher(ctx context.Context, arg CreateVoucherParams) (CreateVoucherRow, error)
+	DeleteCompaignByCode(ctx context.Context, code string) error
 	DeletePlan(ctx context.Context, planID int32) error
 	DeletePurchase(ctx context.Context, purchaseID int32) error
 	DeleteUser(ctx context.Context, userID int32) error
 	DeleteUserType(ctx context.Context, userTypeID int32) error
-	DeleteVoucher(ctx context.Context, voucherID int32) error
+	DeleteVoucherByCode(ctx context.Context, code string) error
 	GetCampaignForUpdate(ctx context.Context, code string) (GetCampaignForUpdateRow, error)
+	GetCompaignByCode(ctx context.Context, code string) (Campaign, error)
 	GetPlanByID(ctx context.Context, planID int32) (Plan, error)
 	GetPurchaseByID(ctx context.Context, purchaseID int32) (GetPurchaseByIDRow, error)
 	GetUserByID(ctx context.Context, userID int32) (User, error)
 	GetUserTypeByID(ctx context.Context, userTypeID int32) (Usertype, error)
-	GetVoucherByID(ctx context.Context, voucherID int32) (GetVoucherByIDRow, error)
+	GetVoucherByCode(ctx context.Context, code string) (GetVoucherByCodeRow, error)
 	//- Doing update directly will lock the record for update, if concurrent update happens (when two user finish register at the same time and there only one voucher left to be generated) this will keep the logic correctly
-	IncreaseRedeemedVoucher(ctx context.Context, code string) (IncreaseRedeemedVoucherRow, error)
+	IncreaseRedeemedVoucher(ctx context.Context, code string) (int64, error)
+	IsCampaginExist(ctx context.Context, code string) (bool, error)
 	IsCampaignValid(ctx context.Context, arg IsCampaignValidParams) (bool, error)
+	IsUserExist(ctx context.Context, email string) (bool, error)
 	ListPlans(ctx context.Context) ([]Plan, error)
 	ListPurchases(ctx context.Context) ([]ListPurchasesRow, error)
 	ListUserTypes(ctx context.Context) ([]Usertype, error)
 	ListUsers(ctx context.Context) ([]User, error)
+	RedeemVoucher(ctx context.Context, arg RedeemVoucherParams) (int64, error)
 	UpdatePlan(ctx context.Context, arg UpdatePlanParams) (Plan, error)
 	UpdatePurchase(ctx context.Context, arg UpdatePurchaseParams) (UpdatePurchaseRow, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error)
 	UpdateUserType(ctx context.Context, arg UpdateUserTypeParams) (Usertype, error)
-	UpdateVoucher(ctx context.Context, arg UpdateVoucherParams) (UpdateVoucherRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

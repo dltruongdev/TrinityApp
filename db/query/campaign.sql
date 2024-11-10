@@ -9,16 +9,21 @@ INSERT INTO Campaigns (name, description, code, start_date, end_date, max_vouche
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
+-- name: IsCampaginExist :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Campaigns
+    WHERE code = $1
+);
 
 -- name: GetCampaignForUpdate :one
 SELECT 
-    name, 
+    campaign_id,
     code,
     end_date, 
-    max_vouchers, 
     voucher_lifetime, 
     discount_percentage,
-    start_date <= NOW() AND end_date > NOW() AND redeemed_vouchers < max_vouchers AS isValid
+    start_date <= NOW() AND end_date > NOW() AND redeemed_vouchers < max_vouchers
 FROM 
     Campaigns
 WHERE 
@@ -27,14 +32,18 @@ FOR NO KEY UPDATE;
 
 
 --- Doing update directly will lock the record for update, if concurrent update happens (when two user finish register at the same time and there only one voucher left to be generated) this will keep the logic correctly
--- name: IncreaseRedeemedVoucher :one 
+-- name: IncreaseRedeemedVoucher :execrows 
 UPDATE Campaigns
-SET redeemed_vouchers = redeemed_vouchers + 1
+SET redeemed_vouchers = redeemed_vouchers + 1, updated_at = NOW()
 WHERE code = $1
 AND end_date > NOW()
-AND redeemed_vouchers < max_vouchers
-RETURNING 
-    start_date, 
-    end_date, 
-    voucher_lifetime, 
-    discount_percentage;
+AND redeemed_vouchers < max_vouchers;
+
+-- name: GetCompaignByCode :one
+SELECT campaign_id, name, description, code, start_date, end_date, max_vouchers, redeemed_vouchers, voucher_lifetime, discount_percentage, created_at, updated_at
+FROM Campaigns
+WHERE code = $1;
+
+-- name: DeleteCompaignByCode :exec
+DELETE FROM Campaigns
+WHERE code = $1;

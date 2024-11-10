@@ -1,7 +1,7 @@
 -- name: CreateUser :one
-INSERT INTO Users (name, email, password_hash, user_type_id)
-VALUES ($1, $2, $3, $4)
-RETURNING user_id, name, email, password_hash, registration_date, last_login, user_type_id;
+INSERT INTO Users (name, email, password_hash, user_type_id, plan_id)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING user_id, name, email, password_hash, registration_date, last_login, user_type_id, plan_id;
 
 -- name: GetUserByID :one
 SELECT user_id, name, email, password_hash, registration_date, last_login, user_type_id, plan_id
@@ -22,3 +22,10 @@ WHERE user_id = $1;
 SELECT user_id, name, email, password_hash, registration_date, last_login, user_type_id, plan_id
 FROM Users
 ORDER BY 1;
+
+-- name: IsUserExist :one
+SELECT EXISTS (
+    SELECT 1
+    FROM Users
+    WHERE email = $1
+);

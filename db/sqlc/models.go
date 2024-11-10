@@ -10,18 +10,18 @@ import (
 )
 
 type Campaign struct {
-	CampaignID         int32          `json:"campaign_id"`
-	Name               string         `json:"name"`
-	Description        sql.NullString `json:"description"`
-	Code               string         `json:"code"`
-	StartDate          time.Time      `json:"start_date"`
-	EndDate            time.Time      `json:"end_date"`
-	MaxVouchers        int32          `json:"max_vouchers"`
-	RedeemedVouchers   sql.NullInt32  `json:"redeemed_vouchers"`
-	VoucherLifetime    int32          `json:"voucher_lifetime"`
-	DiscountPercentage int32          `json:"discount_percentage"`
-	CreatedAt          sql.NullTime   `json:"created_at"`
-	UpdatedAt          sql.NullTime   `json:"updated_at"`
+	CampaignID         int32         `json:"campaign_id"`
+	Name               string        `json:"name"`
+	Description        string        `json:"description"`
+	Code               string        `json:"code"`
+	StartDate          time.Time     `json:"start_date"`
+	EndDate            time.Time     `json:"end_date"`
+	MaxVouchers        int32         `json:"max_vouchers"`
+	RedeemedVouchers   sql.NullInt32 `json:"redeemed_vouchers"`
+	VoucherLifetime    int32         `json:"voucher_lifetime"`
+	DiscountPercentage int32         `json:"discount_percentage"`
+	CreatedAt          sql.NullTime  `json:"created_at"`
+	UpdatedAt          sql.NullTime  `json:"updated_at"`
 }
 
 type Campaignplan struct {
@@ -52,7 +52,7 @@ type User struct {
 	PasswordHash     string        `json:"password_hash"`
 	RegistrationDate sql.NullTime  `json:"registration_date"`
 	LastLogin        sql.NullTime  `json:"last_login"`
-	UserTypeID       sql.NullInt32 `json:"user_type_id"`
+	UserTypeID       int32         `json:"user_type_id"`
 	PlanID           sql.NullInt32 `json:"plan_id"`
 }
 

@@ -49,23 +49,23 @@ func (q *Queries) CreateVoucher(ctx context.Context, arg CreateVoucherParams) (C
 	return i, err
 }
 
-const deleteVoucher = `-- name: DeleteVoucher :exec
+const deleteVoucherByCode = `-- name: DeleteVoucherByCode :exec
 DELETE FROM Vouchers
-WHERE voucher_id = $1
+WHERE code = $1
 `
 
-func (q *Queries) DeleteVoucher(ctx context.Context, voucherID int32) error {
-	_, err := q.db.ExecContext(ctx, deleteVoucher, voucherID)
+func (q *Queries) DeleteVoucherByCode(ctx context.Context, code string) error {
+	_, err := q.db.ExecContext(ctx, deleteVoucherByCode, code)
 	return err
 }
 
-const getVoucherByID = `-- name: GetVoucherByID :one
+const getVoucherByCode = `-- name: GetVoucherByCode :one
 SELECT voucher_id, user_id, campaign_id, code, valid_until
 FROM Vouchers
-WHERE voucher_id = $1
+WHERE code = $1
 `
 
-type GetVoucherByIDRow struct {
+type GetVoucherByCodeRow struct {
 	VoucherID  int32     `json:"voucher_id"`
 	UserID     int32     `json:"user_id"`
 	CampaignID int32     `json:"campaign_id"`
@@ -73,9 +73,9 @@ type GetVoucherByIDRow struct {
 	ValidUntil time.Time `json:"valid_until"`
 }
 
-func (q *Queries) GetVoucherByID(ctx context.Context, voucherID int32) (GetVoucherByIDRow, error) {
-	row := q.db.QueryRowContext(ctx, getVoucherByID, voucherID)
-	var i GetVoucherByIDRow
+func (q *Queries) GetVoucherByCode(ctx context.Context, code string) (GetVoucherByCodeRow, error) {
+	row := q.db.QueryRowContext(ctx, getVoucherByCode, code)
+	var i GetVoucherByCodeRow
 	err := row.Scan(
 		&i.VoucherID,
 		&i.UserID,
@@ -86,44 +86,21 @@ func (q *Queries) GetVoucherByID(ctx context.Context, voucherID int32) (GetVouch
 	return i, err
 }
 
-const updateVoucher = `-- name: UpdateVoucher :one
+const redeemVoucher = `-- name: RedeemVoucher :execrows
 UPDATE Vouchers
-SET user_id = $2, campaign_id = $3, code = $4, valid_until = $5
-WHERE voucher_id = $1
-RETURNING voucher_id, user_id, campaign_id, code, valid_until
+SET is_redeemed = true, updated_at = NOW()
+WHERE code = $1 AND user_id = $2
 `
 
-type UpdateVoucherParams struct {
-	VoucherID  int32     `json:"voucher_id"`
-	UserID     int32     `json:"user_id"`
-	CampaignID int32     `json:"campaign_id"`
-	Code       string    `json:"code"`
-	ValidUntil time.Time `json:"valid_until"`
+type RedeemVoucherParams struct {
+	Code   string `json:"code"`
+	UserID int32  `json:"user_id"`
 }
 
-type UpdateVoucherRow struct {
-	VoucherID  int32     `json:"voucher_id"`
-	UserID     int32     `json:"user_id"`
-	CampaignID int32     `json:"campaign_id"`
-	Code       string    `json:"code"`
-	ValidUntil time.Time `json:"valid_until"`
-}
-
-func (q *Queries) UpdateVoucher(ctx context.Context, arg UpdateVoucherParams) (UpdateVoucherRow, error) {
-	row := q.db.QueryRowContext(ctx, updateVoucher,
-		arg.VoucherID,
-		arg.UserID,
-		arg.CampaignID,
-		arg.Code,
-		arg.ValidUntil,
-	)
-	var i UpdateVoucherRow
-	err := row.Scan(
-		&i.VoucherID,
-		&i.UserID,
-		&i.CampaignID,
-		&i.Code,
-		&i.ValidUntil,
-	)
-	return i, err
+func (q *Queries) RedeemVoucher(ctx context.Context, arg RedeemVoucherParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, redeemVoucher, arg.Code, arg.UserID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
