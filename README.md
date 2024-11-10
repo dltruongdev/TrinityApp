@@ -1,8 +1,9 @@
 # TrinityApp
 Design and implement a promotional campaign system for the Trinity app that offers a 30% discount on Silver subscription plans to the first 100 users who register through campaign links (note that vouchers generated for the campaign are only valid for a limited period).
 ### Port: 8080
-### Routes: api/server.go
+### Routes: api/server.go 
 ## 1. Requirements and Setups
+- OS: Ubuntu 
 - Go 1.23
 - [Go Migrate](https://github.com/golang-migrate/migrate/tree/master/cmd/migrate)
 - Make for Makefile
