@@ -14,3 +14,12 @@ Design and implement a promotional campaign system for the Trinity app that offe
 ## 2. Database schema
 ![trinity](https://github.com/user-attachments/assets/c3dc3aed-3353-4693-ac74-f71c32ca243d)
 [Latest diagrams](https://dbdiagram.io/d/trinity-672ecfede9daa85acad8ad46)
+
+## 3. Flow chart
+![Untitled Diagram](https://github.com/user-attachments/assets/c23f8d8c-4a1e-4c27-99ee-07b0d4a05fbe)
+
+## 4. Improvement (Due to time limit, the app need some improvements)
+- Need implement Authenticate and Authorize
+- Need implement Pagination and Search
+- Need better structure
+- Need document
