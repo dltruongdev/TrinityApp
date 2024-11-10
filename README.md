@@ -1,4 +1,5 @@
 # TrinityApp
+Design and implement a promotional campaign system for the Trinity app that offers a 30% discount on Silver subscription plans to the first 100 users who register through campaign links (note that vouchers generated for the campaign are only valid for a limited period).
 
 ## 1. Requirements and Setups
 - Go 1.23
