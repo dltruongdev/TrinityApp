@@ -20,7 +20,7 @@ Design and implement a promotional campaign system for the Trinity app that offe
 ## 3. Flow chart
 ![Untitled Diagram](https://github.com/user-attachments/assets/c23f8d8c-4a1e-4c27-99ee-07b0d4a05fbe)
 
-## 4. Improvement (Due to time limit, the app need some improvements)
+## 4. Improvement (Due to time limit, the app still need some improvements)
 - Need implement Authenticate and Authorize
 - Need implement Pagination and Search
 - Need better structure
