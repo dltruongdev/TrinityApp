@@ -16,6 +16,18 @@ type createUserRequest struct {
 	UserTypeID int32  `json:"user_type_id" binding:"required,oneof=1 2"`
 }
 
+// @Summary Create a new user
+// @Description Create a new user with the provided details
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body createUserRequest true "User data"
+// @Param promoCode query string false "Promotional code"
+// @Success 201 {object} db.User
+// @Failure 400 {object} gin.H{"error": "Bad Request"}
+// @Failure 409 {object} gin.H{"error": "Conflict"}
+// @Failure 500 {object} gin.H{"error": "Internal server error"}
+// @Router /users [post]
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {

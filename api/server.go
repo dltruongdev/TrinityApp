@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Server serves HTTP requests for our banking service.
 type Server struct {
 	// config     util.Config
 	store *db.Store
@@ -47,8 +46,10 @@ func (server *Server) setupRouter() {
 
 	//vouchers
 	router.GET("/vouchers/:code", server.getVoucherByCode)
-	router.DELETE("/vouchers/:code", server.deleteCampgaignByCode)
+	router.DELETE("/vouchers/:code", server.deleteVoucherByCode)
 	router.POST("vouchers/redeem", server.redeemVoucher)
+
+	// Swagger
 
 	server.router = router
 }

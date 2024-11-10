@@ -21,6 +21,17 @@ type createCampaignRequest struct {
 	PlanID             int32     `json:"plan_id" binding:"required"`
 }
 
+// @Summary Create a new campaign
+// @Description Create a new campaign with the provided details
+// @Tags campaigns
+// @Accept json
+// @Produce json
+// @Param campaign body createCampaignRequest true "Campaign data"
+// @Success 201 {object} db.Campaign
+// @Failure 400 {object} gin.H{"error": "Bad Request"}
+// @Failure 409 {object} gin.H{"error": "Conflict"}
+// @Failure 500 {object} gin.H{"error": "Internal server error"}
+// @Router /campaigns [post]
 func (server *Server) createCampaign(ctx *gin.Context) {
 	var req createCampaignRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -61,6 +72,15 @@ func (server *Server) createCampaign(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, campaign)
 }
 
+// @Summary Get a campaign by code
+// @Description Get details of a campaign by its code
+// @Tags campaigns
+// @Produce json
+// @Param code path string true "Campaign Code"
+// @Success 200 {object} db.Campaign
+// @Failure 404 {object} gin.H{"error": "Campaign not found"}
+// @Failure 500 {object} gin.H{"error": "Internal server error"}
+// @Router /campaigns/{code} [get]
 func (server *Server) getCampgaignByCode(ctx *gin.Context) {
 	code := ctx.Param("code")
 
@@ -77,6 +97,13 @@ func (server *Server) getCampgaignByCode(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, campaign)
 }
 
+// @Summary Delete a campaign by code
+// @Description Delete a campaign using its code
+// @Tags campaigns
+// @Param code path string true "Campaign Code"
+// @Success 204 "No Content"
+// @Failure 500 {object} gin.H{"error": "Internal server error"}
+// @Router /campaigns/{code} [delete]
 func (server *Server) deleteCampgaignByCode(ctx *gin.Context) {
 	code := ctx.Param("code")
 
